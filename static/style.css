@@ -1,0 +1,127 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== BACKGROUND ===== */
+body {
+    height: 100vh;
+    background: radial-gradient(circle at top, #0f2027, #000);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* ===== PARTICLES ===== */
+.particles span {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(0, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 10px cyan;
+    animation: move 20s linear infinite;
+}
+
+.particles span:nth-child(odd) {
+    background: rgba(255, 0, 255, 0.8);
+    box-shadow: 0 0 12px magenta;
+}
+
+.particles span:nth-child(1) { top: 10%; left: 20%; animation-duration: 15s; }
+.particles span:nth-child(2) { top: 30%; left: 80%; animation-duration: 22s; }
+.particles span:nth-child(3) { top: 50%; left: 40%; animation-duration: 18s; }
+.particles span:nth-child(4) { top: 70%; left: 60%; animation-duration: 25s; }
+.particles span:nth-child(5) { top: 90%; left: 10%; animation-duration: 20s; }
+.particles span:nth-child(6) { top: 15%; left: 50%; animation-duration: 23s; }
+.particles span:nth-child(7) { top: 35%; left: 25%; animation-duration: 19s; }
+.particles span:nth-child(8) { top: 65%; left: 75%; animation-duration: 21s; }
+.particles span:nth-child(9) { top: 85%; left: 45%; animation-duration: 24s; }
+.particles span:nth-child(10){ top: 5%;  left: 90%; animation-duration: 26s; }
+
+@keyframes move {
+    from {
+        transform: translateY(0) translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+    }
+}
+
+/* ===== GLASS CARD ===== */
+.container {
+    position: relative;
+    z-index: 10;
+    width: 360px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(0,255,255,0.2);
+    text-align: center;
+}
+
+.container h1 {
+    margin-bottom: 20px;
+    color: cyan;
+    text-shadow: 0 0 10px cyan;
+}
+
+/* ===== INPUTS ===== */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: rgba(0, 0, 0, 0.9);
+    color: rgb(248, 247, 247);  /* ✅ */
+}
+
+input::placeholder {
+    color: #f8f4f4;
+}
+
+
+/* ===== BUTTON ===== */
+button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, cyan, magenta);
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 15px cyan;
+    transition: 0.3s;
+}
+
+button:hover {
+    box-shadow: 0 0 25px magenta;
+}
+
+/* ===== DOWNLOAD BUTTON ===== */
+.download-btn {
+    display: block;
+    margin-top: 20px;
+    padding: 12px;
+    background: lime;
+    color: black;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 0 15px lime;
+}
+
+.download-btn:hover {
+    box-shadow: 0 0 25px lime;
+}

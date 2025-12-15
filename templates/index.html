@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Particle Background -->
+<div class="particles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="container">
+    <h1>YouTube Downloader</h1>
+
+    <form action="/download" method="POST">
+        <input type="text" name="url" placeholder="Paste YouTube link..." required>
+
+        <select name="quality">
+            <option value="best">Best Quality</option>
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="audio">Audio (MP3)</option>
+        </select>
+
+        <button type="submit">Generate Download</button>
+    </form>
+
+    {% if download_link %}
+        <a class="download-btn" href="/files/{{ download_link }}">
+            ⬇ Download File
+        </a>
+    {% endif %}
+</div>
+
+</body>
+</html>
