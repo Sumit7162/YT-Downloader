@@ -1,0 +1,57 @@
+.home {
+  width: 100%;
+}
+
+.home-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideUp 0.4s ease forwards;
+}
+
+/* Divider with label */
+.home-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0;
+}
+.home-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-glass);
+}
+.home-divider-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Success state */
+.home-success {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+}
+.home-success-icon { font-size: 1.5rem; }
+.home-success-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-success-text strong { color: #6ee7b7; font-size: 0.95rem; }
+.home-success-text span { color: var(--text-muted); font-size: 0.82rem; }
+
+/* Another button */
+.home-another {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
