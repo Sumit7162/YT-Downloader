@@ -296,6 +296,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Made with ❤️ using **React** + **Python** + **yt-dlp**
+Made By ♥ Sumit · Download & Enjoy
 
 </div>
