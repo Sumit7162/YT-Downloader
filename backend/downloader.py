@@ -63,47 +63,39 @@ def format_filesize(size_bytes):
 
 def _build_ydl_opts(extra=None):
     """
-    Build yt-dlp options with the best bot-bypass settings.
-    - When cookies.txt is present: uses 'web' client which supports
-      age-restricted videos and is authenticated via cookies.
-    - When no cookies: uses 'tv_embedded' which works without login
-      but cannot access age-restricted content.
+    Build yt-dlp options — uses cookies.txt when present for full auth
+    including age-restricted videos. Forces 'web' client with cookies.
     """
     has_cookies = os.path.exists(COOKIES_FILE)
-
-    if has_cookies:
-        # Authenticated mode: 'web' supports age-restricted content
-        player_clients = ['web', 'mweb']
-        user_agent = (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/124.0.0.0 Safari/537.36'
-        )
-    else:
-        # Unauthenticated mode: tv_embedded doesn't need login
-        player_clients = ['tv_embedded', 'web_creator', 'mweb']
-        user_agent = (
-            'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 '
-            '(KHTML, like Gecko) Version/6.0 TV Safari/538.1'
-        )
 
     opts = {
         'quiet': True,
         'no_warnings': True,
         'nocheckcertificate': True,
         'geo_bypass': True,
+        # Use web_safari as it is less likely to be flagged + works with cookies
         'extractor_args': {
             'youtube': {
-                'player_client': player_clients,
+                'player_client': ['web', 'web_safari'],
+                'player_skip': ['webpage'],
             }
         },
         'http_headers': {
-            'User-Agent': user_agent,
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) '
+                'AppleWebKit/605.1.15 (KHTML, like Gecko) '
+                'Version/17.4.1 Safari/605.1.15'
+            ),
+            'Accept-Language': 'en-US,en;q=0.9',
+            'X-YouTube-Client-Name': '1',
+            'X-YouTube-Client-Version': '2.20240415.01.00',
         },
     }
 
     if has_cookies:
         opts['cookiefile'] = COOKIES_FILE
+        # Force age bypass using cookies
+        opts['age_limit'] = 100
 
     if extra:
         opts.update(extra)
