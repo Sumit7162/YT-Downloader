@@ -67,9 +67,10 @@ def video_info():
             return jsonify({'error': 'This video is unavailable or private.'}), 404
         elif 'Sign in' in error_msg or 'bot' in error_msg.lower():
             return jsonify({
-                'error': 'YouTube is blocking this request. Please add cookies.txt to the backend folder. See README for instructions.'
+                'error': 'YouTube is blocking this request. Please add cookies.txt to the backend folder. See README for instructions.',
+                'details': error_msg
             }), 403
-        return jsonify({'error': f'Failed to fetch video info: {error_msg}'}), 500
+        return jsonify({'error': f'Failed to fetch video info: {error_msg}', 'details': error_msg}), 500
 
 
 @app.route('/api/download', methods=['POST', 'OPTIONS'])
