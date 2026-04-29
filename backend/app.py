@@ -28,14 +28,28 @@ def health_check():
 def debug_info():
     """Debug endpoint to verify cookies and environment."""
     import os
+    import subprocess
     from downloader import COOKIES_FILE, DOWNLOAD_DIR
     cookies_exists = os.path.exists(COOKIES_FILE)
+    
+    # Check yt-dlp impersonate targets
+    try:
+        impersonate_targets = subprocess.check_output(
+            ['yt-dlp', '--list-impersonate-targets'], 
+            stderr=subprocess.STDOUT, text=True
+        )
+    except Exception as e:
+        impersonate_targets = str(e)
+        if hasattr(e, 'output'):
+            impersonate_targets += f"\nOutput: {e.output}"
+
     return jsonify({
         'cookies_file_path': COOKIES_FILE,
         'cookies_exists': cookies_exists,
         'cookies_size': os.path.getsize(COOKIES_FILE) if cookies_exists else 0,
         'download_dir': DOWNLOAD_DIR,
         'cwd': os.getcwd(),
+        'impersonate_targets': impersonate_targets
     })
 
 
