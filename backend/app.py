@@ -8,6 +8,10 @@ from flask_cors import CORS
 from downloader import get_video_info, download_video
 import os
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 
 # Allow all origins (frontend on Vercel/Netlify/localhost can all call this)
@@ -18,6 +22,21 @@ CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=False)
 def health_check():
     """Health check endpoint."""
     return jsonify({'status': 'ok', 'message': 'YT-Downloader API is running'})
+
+
+@app.route('/api/debug', methods=['GET'])
+def debug_info():
+    """Debug endpoint to verify cookies and environment."""
+    import os
+    from downloader import COOKIES_FILE, DOWNLOAD_DIR
+    cookies_exists = os.path.exists(COOKIES_FILE)
+    return jsonify({
+        'cookies_file_path': COOKIES_FILE,
+        'cookies_exists': cookies_exists,
+        'cookies_size': os.path.getsize(COOKIES_FILE) if cookies_exists else 0,
+        'download_dir': DOWNLOAD_DIR,
+        'cwd': os.getcwd(),
+    })
 
 
 @app.route('/api/info', methods=['POST', 'OPTIONS'])
