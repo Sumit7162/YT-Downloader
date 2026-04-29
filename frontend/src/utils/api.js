@@ -2,7 +2,7 @@
  * api.js — API utility functions for the YT-Downloader frontend
  */
 
-const BASE_URL = '';  // Proxied via Vite dev server
+const BASE_URL = 'https://yt-downloader-0gxt.onrender.com'; // Deployed backend URL
 
 /**
  * Fetch video info and available formats from the backend.

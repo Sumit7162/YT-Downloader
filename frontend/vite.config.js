@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://yt-downloader-0gxt.onrender.com',
         changeOrigin: true,
       },
     },

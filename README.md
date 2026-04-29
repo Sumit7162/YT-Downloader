@@ -106,7 +106,8 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The backend will start at **http://localhost:5000**
+The backend is now deployed at: **https://yt-downloader-0gxt.onrender.com**
+(Previously http://localhost:5000)
 
 ### 3. Set Up the Frontend
 
@@ -250,7 +251,7 @@ Edit `frontend/vite.config.js`:
 server: {
   port: 3000,
   proxy: {
-    '/api': { target: 'http://localhost:5000' }  // Match backend port
+    '/api': { target: 'https://yt-downloader-0gxt.onrender.com' }  // Match deployed backend
   }
 }
 ```
