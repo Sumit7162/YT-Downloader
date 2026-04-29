@@ -46,8 +46,6 @@ def video_info():
         error_msg = str(e)
         if 'Video unavailable' in error_msg:
             return jsonify({'error': 'This video is unavailable or private.'}), 404
-        elif 'age' in error_msg.lower():
-            return jsonify({'error': 'This video is age-restricted and cannot be downloaded.'}), 403
         elif 'Sign in' in error_msg or 'bot' in error_msg.lower():
             return jsonify({
                 'error': 'YouTube is blocking this request. Please add cookies.txt to the backend folder. See README for instructions.'

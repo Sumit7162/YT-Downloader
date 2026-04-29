@@ -64,32 +64,45 @@ def format_filesize(size_bytes):
 def _build_ydl_opts(extra=None):
     """
     Build yt-dlp options with the best bot-bypass settings.
-    Uses tv_embedded as primary client (no login required),
-    with web_creator and mweb as fallbacks.
+    - When cookies.txt is present: uses 'web' client which supports
+      age-restricted videos and is authenticated via cookies.
+    - When no cookies: uses 'tv_embedded' which works without login
+      but cannot access age-restricted content.
     """
+    has_cookies = os.path.exists(COOKIES_FILE)
+
+    if has_cookies:
+        # Authenticated mode: 'web' supports age-restricted content
+        player_clients = ['web', 'mweb']
+        user_agent = (
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) '
+            'Chrome/124.0.0.0 Safari/537.36'
+        )
+    else:
+        # Unauthenticated mode: tv_embedded doesn't need login
+        player_clients = ['tv_embedded', 'web_creator', 'mweb']
+        user_agent = (
+            'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 '
+            '(KHTML, like Gecko) Version/6.0 TV Safari/538.1'
+        )
+
     opts = {
         'quiet': True,
         'no_warnings': True,
         'nocheckcertificate': True,
         'geo_bypass': True,
-        # tv_embedded = YouTube TV client — does NOT require login/cookies
-        # web_creator & mweb as fallbacks
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv_embedded', 'web_creator', 'mweb'],
-                'player_skip': ['js'],
+                'player_client': player_clients,
             }
         },
         'http_headers': {
-            'User-Agent': (
-                'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 '
-                '(KHTML, like Gecko) Version/6.0 TV Safari/538.1'
-            ),
+            'User-Agent': user_agent,
         },
     }
 
-    # Use cookies if available
-    if os.path.exists(COOKIES_FILE):
+    if has_cookies:
         opts['cookiefile'] = COOKIES_FILE
 
     if extra:
