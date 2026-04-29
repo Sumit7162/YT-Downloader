@@ -1,8 +1,9 @@
 /**
  * api.js — API utility functions for the YT-Downloader frontend
+ * Backend deployed at: https://yt-downloader-0gxt.onrender.com
  */
 
-const BASE_URL = 'https://yt-downloader-0gxt.onrender.com'; // Deployed backend URL
+const BASE_URL = 'https://yt-downloader-0gxt.onrender.com';
 
 /**
  * Fetch video info and available formats from the backend.
@@ -12,7 +13,10 @@ const BASE_URL = 'https://yt-downloader-0gxt.onrender.com'; // Deployed backend 
 export async function fetchVideoInfo(url) {
   const response = await fetch(`${BASE_URL}/api/info`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
     body: JSON.stringify({ url }),
   });
 
@@ -34,7 +38,10 @@ export async function fetchVideoInfo(url) {
 export async function downloadVideo(url, formatId, filename, onProgress) {
   const response = await fetch(`${BASE_URL}/api/download`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    },
     body: JSON.stringify({ url, format_id: formatId, filename }),
   });
 
@@ -80,8 +87,12 @@ export async function downloadVideo(url, formatId, filename, onProgress) {
  * Health check
  */
 export async function checkHealth() {
-  const response = await fetch(`${BASE_URL}/api/health`);
-  return response.ok;
+  try {
+    const response = await fetch(`${BASE_URL}/api/health`);
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 /**

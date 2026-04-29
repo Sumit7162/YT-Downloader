@@ -9,7 +9,9 @@ from downloader import get_video_info, download_video
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Allow all origins (frontend on Vercel/Netlify/localhost can all call this)
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=False)
 
 
 @app.route('/api/health', methods=['GET'])
@@ -18,12 +20,15 @@ def health_check():
     return jsonify({'status': 'ok', 'message': 'YT-Downloader API is running'})
 
 
-@app.route('/api/info', methods=['POST'])
+@app.route('/api/info', methods=['POST', 'OPTIONS'])
 def video_info():
     """
     Extract video information and available formats.
     Expects JSON body: { "url": "https://youtube.com/watch?v=..." }
     """
+    if request.method == 'OPTIONS':
+        return '', 204
+
     data = request.get_json()
     if not data or 'url' not in data:
         return jsonify({'error': 'Missing URL in request body'}), 400
@@ -31,7 +36,7 @@ def video_info():
     url = data['url'].strip()
 
     # Basic URL validation
-    if not any(domain in url for domain in ['youtube.com', 'youtu.be', 'youtube.com/shorts']):
+    if not any(domain in url for domain in ['youtube.com', 'youtu.be']):
         return jsonify({'error': 'Invalid YouTube URL. Please provide a valid YouTube link.'}), 400
 
     try:
@@ -43,15 +48,22 @@ def video_info():
             return jsonify({'error': 'This video is unavailable or private.'}), 404
         elif 'age' in error_msg.lower():
             return jsonify({'error': 'This video is age-restricted and cannot be downloaded.'}), 403
+        elif 'Sign in' in error_msg or 'bot' in error_msg.lower():
+            return jsonify({
+                'error': 'YouTube is blocking this request. Please add cookies.txt to the backend folder. See README for instructions.'
+            }), 403
         return jsonify({'error': f'Failed to fetch video info: {error_msg}'}), 500
 
 
-@app.route('/api/download', methods=['POST'])
+@app.route('/api/download', methods=['POST', 'OPTIONS'])
 def download():
     """
     Download a video/audio in the specified format.
     Expects JSON body: { "url": "...", "format_id": "...", "filename": "..." }
     """
+    if request.method == 'OPTIONS':
+        return '', 204
+
     data = request.get_json()
     if not data or 'url' not in data or 'format_id' not in data:
         return jsonify({'error': 'Missing URL or format_id in request body'}), 400
@@ -65,13 +77,11 @@ def download():
         if not filepath:
             return jsonify({'error': 'Download failed — file not found after processing.'}), 500
 
-        # Send the file and schedule cleanup
         response = send_file(
             filepath,
             as_attachment=True,
             download_name=suggested_filename,
         )
-
         return response
 
     except Exception as e:
@@ -79,12 +89,6 @@ def download():
 
 
 if __name__ == '__main__':
-    print("\nStarting YT-Downloader API Server")
-    print("=" * 40)
-    print("Running on http://localhost:5000")
-    print("📋 Endpoints:")
-    print("   GET  /api/health")
-    print("   POST /api/info")
-    print("   POST /api/download")
-    print("=" * 40 + "\n")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\nStarting YT-Downloader API Server on port {port}")
+    app.run(debug=False, host='0.0.0.0', port=port)

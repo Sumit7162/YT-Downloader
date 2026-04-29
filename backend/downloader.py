@@ -1,6 +1,7 @@
 """
 YT-Downloader — yt-dlp wrapper module
 Handles video info extraction and downloading with quality categorization.
+Uses tv_embedded/mweb clients to bypass YouTube bot detection on cloud servers.
 """
 
 import yt_dlp
@@ -13,6 +14,9 @@ import time
 # Temp download directory
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+# Path to cookies file (optional — if provided, helps bypass restrictions)
+COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt")
 
 # Auto-cleanup: remove files older than 10 minutes
 def cleanup_old_files():
@@ -57,8 +61,41 @@ def format_filesize(size_bytes):
     return f"{size_bytes:.1f} TB"
 
 
-# Path to cookies file (if provided by user to bypass bot detection)
-COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt")
+def _build_ydl_opts(extra=None):
+    """
+    Build yt-dlp options with the best bot-bypass settings.
+    Uses tv_embedded as primary client (no login required),
+    with web_creator and mweb as fallbacks.
+    """
+    opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'nocheckcertificate': True,
+        'geo_bypass': True,
+        # tv_embedded = YouTube TV client — does NOT require login/cookies
+        # web_creator & mweb as fallbacks
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['tv_embedded', 'web_creator', 'mweb'],
+                'player_skip': ['js'],
+            }
+        },
+        'http_headers': {
+            'User-Agent': (
+                'Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 '
+                '(KHTML, like Gecko) Version/6.0 TV Safari/538.1'
+            ),
+        },
+    }
+
+    # Use cookies if available
+    if os.path.exists(COOKIES_FILE):
+        opts['cookiefile'] = COOKIES_FILE
+
+    if extra:
+        opts.update(extra)
+
+    return opts
 
 
 def get_video_info(url):
@@ -66,31 +103,9 @@ def get_video_info(url):
     Extract video metadata and available formats from a YouTube URL.
     Returns structured data with video info and categorized quality options.
     """
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
+    ydl_opts = _build_ydl_opts({
         'extract_flat': False,
-        'nocheckcertificate': True,
-        'geo_bypass': True,
-        'youtube_include_dash_manifest': False,
-        # Force specific clients to bypass bot detection
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web'],
-                'skip': ['dash', 'hls']
-            }
-        },
-        # Try to impersonate a real browser
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Sec-Fetch-Mode': 'navigate',
-        }
-    }
-
-    if os.path.exists(COOKIES_FILE):
-        ydl_opts['cookiefile'] = COOKIES_FILE
+    })
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
@@ -130,10 +145,10 @@ def get_video_info(url):
         acodec = fmt.get('acodec', 'none')
         height = fmt.get('height')
         filesize = fmt.get('filesize') or fmt.get('filesize_approx')
-        tbr = fmt.get('tbr')  # Total bitrate
-        abr = fmt.get('abr')  # Audio bitrate
+        tbr = fmt.get('tbr')
+        abr = fmt.get('abr')
 
-        # Skip fragmented DASH formats that can't be easily downloaded
+        # Skip fragmented streaming formats
         protocol = fmt.get('protocol', '')
         if protocol in ('m3u8', 'm3u8_native'):
             continue
@@ -174,13 +189,16 @@ def get_video_info(url):
 
     # Sort video by height descending, audio by bitrate descending
     video_formats.sort(key=lambda x: x.get('height', 0), reverse=True)
-    audio_formats.sort(key=lambda x: int(re.sub(r'[^\d]', '', x.get('bitrate', '0')) or 0), reverse=True)
+    audio_formats.sort(
+        key=lambda x: int(re.sub(r'[^\d]', '', x.get('bitrate', '0')) or 0),
+        reverse=True
+    )
 
     # Limit to best options
     video_formats = video_formats[:6]
     audio_formats = audio_formats[:4]
 
-    # If no combined formats found, add best format options using yt-dlp's format selection
+    # Fallback: if no combined formats found, generate format-string options
     if not video_formats:
         for quality in ['2160', '1440', '1080', '720', '480', '360']:
             video_formats.append({
@@ -210,33 +228,17 @@ def download_video(url, format_id):
     unique_id = str(uuid.uuid4())[:8]
     output_template = os.path.join(DOWNLOAD_DIR, f'{unique_id}_%(title)s.%(ext)s')
 
-    ydl_opts = {
+    ydl_opts = _build_ydl_opts({
         'format': format_id,
         'outtmpl': output_template,
-        'quiet': True,
-        'no_warnings': True,
         'merge_output_format': 'mp4',
-        'nocheckcertificate': True,
-        'geo_bypass': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'web'],
-                'skip': ['dash', 'hls']
-            }
-        },
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        }
-    }
-
-    if os.path.exists(COOKIES_FILE):
-        ydl_opts['cookiefile'] = COOKIES_FILE
+    })
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info)
 
-        # Check for merged file (mp4)
+        # Check for merged mp4 file
         if not os.path.exists(filename):
             base, _ = os.path.splitext(filename)
             filename = base + '.mp4'
