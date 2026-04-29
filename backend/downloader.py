@@ -73,22 +73,21 @@ def _build_ydl_opts(extra=None):
         'no_warnings': True,
         'nocheckcertificate': True,
         'geo_bypass': True,
-        # Use web_safari as it is less likely to be flagged + works with cookies
+        # tv_embedded client is far less aggressively bot-checked by YouTube.
+        # When cookies are present it acts as a logged-in TV client.
+        # 'web' is kept as a fallback for formats tv_embedded may not serve.
         'extractor_args': {
             'youtube': {
-                'player_client': ['web', 'web_safari'],
-                'player_skip': ['webpage'],
+                'player_client': ['tv_embedded', 'web'],
             }
         },
         'http_headers': {
             'User-Agent': (
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4_1) '
-                'AppleWebKit/605.1.15 (KHTML, like Gecko) '
-                'Version/17.4.1 Safari/605.1.15'
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/124.0.0.0 Safari/537.36'
             ),
             'Accept-Language': 'en-US,en;q=0.9',
-            'X-YouTube-Client-Name': '1',
-            'X-YouTube-Client-Version': '2.20240415.01.00',
         },
     }
 
