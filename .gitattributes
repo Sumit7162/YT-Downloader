@@ -1,5 +1,5 @@
-# Force cookies.txt as binary — no CRLF conversion
-backend/cookies.txt -text
+# Force cookies.txt to LF — prevents CRLF breaking yt-dlp on Linux servers
+backend/cookies.txt text eol=lf
 
 # Frontend/backend source files — LF always
 *.py text eol=lf
