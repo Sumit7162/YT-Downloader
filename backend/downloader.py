@@ -73,23 +73,13 @@ def _build_ydl_opts(extra=None):
         'no_warnings': True,
         'nocheckcertificate': True,
         'geo_bypass': True,
-        # TLS Impersonation via curl-cffi: Mimics Chrome to bypass YouTube's WAF on datacenter IPs
-        'impersonate': 'chrome',
         # Priority to mobile and TV clients which face less aggressive bot-checks on datacenter IPs.
         # When cookies are present, this acts as a logged-in device.
         'extractor_args': {
             'youtube': {
                 'player_client': ['ios', 'android', 'tv_embedded', 'web'],
             }
-        },
-        'http_headers': {
-            'User-Agent': (
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/124.0.0.0 Safari/537.36'
-            ),
-            'Accept-Language': 'en-US,en;q=0.9',
-        },
+        }
     }
 
     if has_cookies:
