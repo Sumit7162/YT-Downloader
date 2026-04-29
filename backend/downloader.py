@@ -73,12 +73,11 @@ def _build_ydl_opts(extra=None):
         'no_warnings': True,
         'nocheckcertificate': True,
         'geo_bypass': True,
-        # tv_embedded client is far less aggressively bot-checked by YouTube.
-        # When cookies are present it acts as a logged-in TV client.
-        # 'web' is kept as a fallback for formats tv_embedded may not serve.
+        # Priority to mobile and TV clients which face less aggressive bot-checks on datacenter IPs.
+        # When cookies are present, this acts as a logged-in device.
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv_embedded', 'web'],
+                'player_client': ['ios', 'android', 'tv_embedded', 'web'],
             }
         },
         'http_headers': {
