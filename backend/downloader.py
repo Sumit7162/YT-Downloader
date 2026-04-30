@@ -87,6 +87,11 @@ def _build_ydl_opts(extra=None):
         # Force age bypass using cookies
         opts['age_limit'] = 100
 
+    # Add proxy support to bypass IP blocks
+    proxy = os.environ.get('YT_PROXY') or os.environ.get('HTTPS_PROXY') or os.environ.get('HTTP_PROXY')
+    if proxy:
+        opts['proxy'] = proxy
+
     if extra:
         opts.update(extra)
 
